@@ -44,8 +44,12 @@ namespace PPTime {
         }
 
         private void RefreshPresentations() {
+            OpenPresentation? previouslySelectedPresentation = SelectedPresentation;
+            SelectedPresentation = default;
+
             List<OpenPresentation> openPresentations = PPUtils.GetOpenPresentations();
             if (openPresentations.Count > 0) {
+                // iterate from back to front to not cause indexing errors
                 for (int i = OpenPresentations.Count - 1; i >= 0; i--) {
                     var presentation = OpenPresentations[i];
                     if (!openPresentations.Contains(presentation)) {
@@ -61,21 +65,28 @@ namespace PPTime {
                         OpenPresentations.Add(presentation);
                     }
                 }
-                if (SelectedPresentation != default && !OpenPresentations.Contains(SelectedPresentation))
-                    SelectedPresentation = default;
-                if (SelectedPresentation == default && OpenPresentations.Count > 0)
+                if (previouslySelectedPresentation != default) {
+                    if (OpenPresentations.Contains(previouslySelectedPresentation)) {
+                        SelectedPresentation = previouslySelectedPresentation;
+                    }
+                    else {
+                        SelectedPresentation = default;
+                    }
+                }
+                if (previouslySelectedPresentation == default && OpenPresentations.Count > 0) {
                     SelectedPresentation = OpenPresentations.FirstOrDefault();
+                }
             }
             else {
                 Debug.WriteLine("PowerPoint is not running or there is no open presentation.");
                 MessageBox.Show("Es wurden keine geöffneten PowerPoint-Dateien gefunden.");
+                SelectedPresentation = default;
             }
         }
 
         private async void ReloadPresentation() {
             if (SelectedPresentation != default) {
                 Presentation.PresentationPath = SelectedPresentation?.Path;
-
                 _cts.Cancel();
                 try {
                     if (_previousTask != default) {
@@ -99,7 +110,6 @@ namespace PPTime {
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e) {
             RefreshPresentations();
-            ReloadPresentation();
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e) {
@@ -107,10 +117,6 @@ namespace PPTime {
                 FileName = e.Uri.ToString(),
                 UseShellExecute = true
             });
-        }
-
-        private void cbOpenPowerpoints_Selected(object sender, RoutedEventArgs e) {
-            ReloadPresentation();
         }
 
         private void cbOpenPowerpoints_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
