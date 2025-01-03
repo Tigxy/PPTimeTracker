@@ -10,7 +10,7 @@ namespace PPTimeTracker {
         private string? _presentationPath;
         private string? _presentationName;
         private int _totalDuration;
-        private int _anyValueNotFound;
+        private int _countValuesNotFound;
 
         public string? PresentationPath {
             get {
@@ -56,17 +56,19 @@ namespace PPTimeTracker {
         /// <summary>
         /// < 0 if not all values have been found
         /// </summary>
-        public int AnyValueNotFound {
+        public int CountValuesNotFound {
             get {
-                return _anyValueNotFound;
+                return _countValuesNotFound;
             }
             internal set {
-                if (_anyValueNotFound != value) {
-                    _anyValueNotFound = value;
+                if (_countValuesNotFound != value) {
+                    _countValuesNotFound = value;
+                    OnPropertyChanged(nameof(CountValuesNotFound));
                     OnPropertyChanged(nameof(AnyValueNotFound));
                 }
             }
         }
+        public bool AnyValueNotFound => CountValuesNotFound > 0;
 
         public ObservableCollection<Slide> Slides { get; internal set; } = new();
 

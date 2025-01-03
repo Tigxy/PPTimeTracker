@@ -18,8 +18,8 @@ namespace PPTime {
         public int TotalDuration => Math.Max(0, TransitionDuration) + Math.Max(Math.Max(0, NextSlideAfter), Math.Max(0, AnimationDuration));
         public double TotalDurationInSeconds => TotalDuration / 1000.0;
 
-        // -1 if something is missing
-        public int AnyValueNotFound => TransitionDuration < 0 || NextSlideAfter < 0 || AnimationDuration < 0 ? -1 : 0;
+        public int CountValuesNotFound => Convert.ToInt16(TransitionDuration < 0) + Convert.ToInt16(NextSlideAfter < 0) + Convert.ToInt16(AnimationDuration < 0);
+        public bool AnyValueNotFound => CountValuesNotFound > 0;
 
         public int CumulativeTotalDuration { get; set; }
         public bool IsLastSlide { get; set; }

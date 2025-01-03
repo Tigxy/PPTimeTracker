@@ -15,7 +15,7 @@ namespace PPTimeTracker {
             Slides.Clear();
             PresentationPath = default;
             TotalDuration = 0;
-            AnyValueNotFound = 0;
+            CountValuesNotFound = 0;
         }
 
         public async override void Reload(CancellationToken token) {
@@ -24,7 +24,7 @@ namespace PPTimeTracker {
                 // clear all slides
                 Slides.Clear();
                 TotalDuration = 0;
-                AnyValueNotFound = 1;
+                CountValuesNotFound = 0;
             });
 
             try {
@@ -90,7 +90,7 @@ namespace PPTimeTracker {
                         await System.Windows.Application.Current.Dispatcher.BeginInvoke(() => {
                             if (timeSlide.IsVisible) {
                                 TotalDuration += timeSlide.TotalDuration;
-                                AnyValueNotFound += timeSlide.AnyValueNotFound;
+                                CountValuesNotFound += timeSlide.CountValuesNotFound;
                             }
                             this.Slides.Add(timeSlide);
                         });
@@ -106,9 +106,6 @@ namespace PPTimeTracker {
             catch (OperationCanceledException) {
                 Debug.WriteLine("Reload() canceled.");
             }
-
-            TotalDuration = Slides.Where(s => s.IsVisible).Sum(s => s.TotalDuration);
-            AnyValueNotFound = Slides.Where(s => s.IsVisible).Sum(s => s.AnyValueNotFound);
         }
     }
 }
