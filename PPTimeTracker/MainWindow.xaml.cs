@@ -106,6 +106,9 @@ namespace PPTime {
 
                 _previousTask = Task.Run(() => Presentation.Reload(_cts.Token), _cts.Token);
             }
+            else {
+                Presentation.Reset();
+            }
         }
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e) {

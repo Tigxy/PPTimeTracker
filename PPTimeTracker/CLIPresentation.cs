@@ -11,6 +11,13 @@ using pp = Microsoft.Office.Interop.PowerPoint;
 
 namespace PPTimeTracker {
     public class CLIPresentation : BasePresentation {
+        public override void Reset() {
+            Slides.Clear();
+            PresentationPath = default;
+            TotalDuration = 0;
+            AnyValueNotFound = 0;
+        }
+
         public async override void Reload(CancellationToken token) {
             // Ensure UI thread access
             await System.Windows.Application.Current.Dispatcher.BeginInvoke(() => {
