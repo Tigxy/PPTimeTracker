@@ -81,7 +81,10 @@ namespace PPTime {
                 SelectedPresentation = default;
                 if (showUserMessages) {
                     Debug.WriteLine("PowerPoint is not running or there is no open presentation.");
-                    MessageBox.Show("Es wurden keine geöffneten PowerPoint-Dateien gefunden.");
+                    MessageBox.Show(
+                        "Es wurde keine aktive PowerPoint-Instanz mit einer bearbeitbaren Datei gefunden. " +
+                        "Bitte stelle sicher, dass eine PowerPoint-Anwendung mit einer geöffneten Datei im Bearbeitungsmodus läuft."
+                    );
                 }
             }
         }
