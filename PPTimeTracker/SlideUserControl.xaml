@@ -1,0 +1,187 @@
+﻿<UserControl x:Class="PPTime.SlideUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PPTime"
+             mc:Ignorable="d" FontSize="16"
+             d:DesignHeight="100" d:DesignWidth="200">
+    <d:DesignerProperties.DesignStyle>
+        <Style TargetType="UserControl">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Height" Value="500" />
+            <Setter Property="Width" Value="500" />
+        </Style>
+    </d:DesignerProperties.DesignStyle>
+    <UserControl.Resources>
+        <local:MillisecondsToTimeConverter x:Key="MillisecondsToTimeConverter"/>
+        <local:ValueToColorConverter x:Key="ValueToColorConverter"/>
+        <local:MissingValueConverter x:Key="MissingValueConverter"/>
+        <local:BoolToVisibilityColorConverter x:Key="BoolToVisibilityColorConverter"/>
+        <local:BoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter" Invert="true"/>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" Invert="False"/>
+        <local:SlideWidthConverter x:Key="SlideWidthConverter" Min="70" Max="250" Scaling="0.05"/>
+        <local:PercentWidthConverter x:Key="PercentWidthConverter"/>
+        <local:ConditionalColorConverter x:Key="ConditionalColorConverter"/>
+        <SolidColorBrush x:Key="TransitionBrush">LightSteelBlue</SolidColorBrush>
+        <SolidColorBrush x:Key="AnimationBrush">PaleGreen</SolidColorBrush>
+        <SolidColorBrush x:Key="NextSlideBrush">LightSkyBlue</SolidColorBrush>
+    </UserControl.Resources>
+    <Border BorderBrush="Black" BorderThickness="1" CornerRadius="6"
+            Background="{Binding IsVisible, FallbackValue=Transparent, Converter={StaticResource BoolToVisibilityColorConverter}}"
+            >
+        <Grid Margin="0" Width="{Binding TotalDuration, Converter={StaticResource SlideWidthConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Some layouting -->
+            <TextBlock Grid.Row="4"
+                       Text="{Binding CumulativeTotalDuration, FallbackValue=0, Converter={StaticResource MillisecondsToTimeConverter}}"
+                       Foreground="{Binding AnyValueNotFound, FallbackValue=Black, Converter={StaticResource ValueToColorConverter}}"
+                       VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 -3 2 2"
+                       ToolTip="Gesamte Dauer inkl. Folie"
+                       Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <Separator Grid.Row="3" Grid.ColumnSpan="3" />
+            <Separator Grid.Row="1" Grid.ColumnSpan="3" />
+
+            <Grid Grid.Row="0" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Folie" Margin="0 0 3 0"/>
+                <TextBlock Grid.Column="1" Text="{Binding SlideNumber, FallbackValue=1}"/>
+            </Grid>
+
+            <Grid Margin="0" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Transition time -->
+                <Rectangle Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1" HorizontalAlignment="Left">
+                    <Rectangle.Fill>
+                        <MultiBinding Converter="{StaticResource ConditionalColorConverter}">
+                            <Binding Source="{StaticResource TransitionBrush}"/>
+                            <Binding Path="IsVisible"/>
+                        </MultiBinding>
+                    </Rectangle.Fill>
+                    <Rectangle.Width>
+                        <MultiBinding Converter="{StaticResource PercentWidthConverter}">
+                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Border}" />
+                            <Binding Path="TransitionDuration"/>
+                            <Binding Path="TotalDuration"/>
+                        </MultiBinding>
+                    </Rectangle.Width>
+                </Rectangle>
+
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock 
+                           Text="{Binding TransitionDurationInSeconds, FallbackValue=-1, Converter={StaticResource MissingValueConverter}, StringFormat={}{0:F2}}"
+                           Foreground="{Binding TransitionDuration, FallbackValue=Black, Converter={StaticResource ValueToColorConverter}}"
+                           VerticalAlignment="Center" Grid.Column="0" HorizontalAlignment="Right"
+                           />
+                    <TextBlock VerticalAlignment="Center" Text="s" Padding="2 0 5 0" Grid.Column="1"/>
+                </Grid>
+
+
+                <!-- Animation time -->
+                <Rectangle Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left">
+                    <Rectangle.Fill>
+                        <MultiBinding Converter="{StaticResource ConditionalColorConverter}">
+                            <Binding Source="{StaticResource AnimationBrush}"/>
+                            <Binding Path="IsVisible"/>
+                        </MultiBinding>
+                    </Rectangle.Fill>
+                    <Rectangle.Width>
+                        <MultiBinding Converter="{StaticResource PercentWidthConverter}">
+                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}" />
+                            <Binding Path="AnimationDuration"/>
+                            <Binding Path="TotalDuration"/>
+                        </MultiBinding>
+                    </Rectangle.Width>
+                </Rectangle>
+
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock 
+                           Text="{Binding AnimationDurationInSeconds, FallbackValue=-1, Converter={StaticResource MissingValueConverter}, StringFormat={}{0:F2}}"
+                           Foreground="{Binding AnimationDuration, FallbackValue=Black, Converter={StaticResource ValueToColorConverter}}"
+                           VerticalAlignment="Center" Grid.Column="0"
+                           />
+                    <TextBlock VerticalAlignment="Center" Text="s" Padding="2 0 5 0" Grid.Column="1"/>
+                </Grid>
+
+
+                <!-- Time until next slide -->
+                <Rectangle Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left">
+                    <Rectangle.Fill>
+                        <MultiBinding Converter="{StaticResource ConditionalColorConverter}">
+                            <Binding Source="{StaticResource NextSlideBrush}"/>
+                            <Binding Path="IsVisible"/>
+                        </MultiBinding>
+                    </Rectangle.Fill>
+                    <Rectangle.Width>
+                        <MultiBinding Converter="{StaticResource PercentWidthConverter}">
+                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=Border}" />
+                            <Binding Path="NextSlideAfter"/>
+                            <Binding Path="TotalDuration"/>
+                        </MultiBinding>
+                    </Rectangle.Width>
+                </Rectangle>
+
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock 
+                           Text="{Binding NextSlideAfterInSeconds, FallbackValue=-1, Converter={StaticResource MissingValueConverter}, StringFormat={}{0:F2}}"
+                           Foreground="{Binding NextSlideAfter, FallbackValue=Black, Converter={StaticResource ValueToColorConverter}}"
+                           VerticalAlignment="Center" Grid.Column="0"
+                           />
+                    <TextBlock VerticalAlignment="Center" Text="s" Padding="2 0 5 0" Grid.Column="1"/>
+                </Grid>
+
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Left"
+                           FontFamily="Segoe MDL2 Assets" Text="&#xEBE7;" Margin="4"
+                           ToolTip="Dauer des Übergangs"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Left"
+                           FontFamily="Segoe MDL2 Assets" Text="&#xE734;" Margin="4"
+                           ToolTip="Gesamte Dauer der Animationen"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Left"
+                           FontFamily="Segoe MDL2 Assets" Text="&#xF182;" Margin="4"
+                           ToolTip="Automatische Folienwechsel nach"/>
+
+                <TextBlock Grid.ColumnSpan="2" Grid.RowSpan="3" FontFamily="Segoe MDL2 Assets" Text="&#xE7B3;" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="50" 
+                           Visibility="{Binding IsVisible, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                <TextBlock Grid.ColumnSpan="2" Grid.RowSpan="3" FontFamily="Segoe MDL2 Assets" Text="&#xE711;" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="50"
+                           Visibility="{Binding IsVisible, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

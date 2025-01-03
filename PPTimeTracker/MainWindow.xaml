@@ -1,0 +1,121 @@
+﻿<Window x:Class="PPTime.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PPTime"
+        mc:Ignorable="d"
+        Title="PowerPoint Time Tracker" Height="600" Width="800"
+        SizeToContent="Height"
+        MinHeight="400" MinWidth="600" Icon="/stopwatch_black.png">
+    <Window.Resources>
+        <local:MillisecondsToTimeConverter x:Key="MillisecondsToTimeConverter"/>
+        <local:ValueToColorConverter x:Key="ValueToColorConverter"/>
+        <local:BoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter" Invert="true"/>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0">
+            <GroupBox Header="Geöffnete Powerpoint auswählen" Padding="4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <!--<ColumnDefinition Width="Auto"/>-->
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox Grid.Column="0" Name="cbOpenPowerpoints" 
+                              ItemsSource="{Binding OpenPresentations}" SelectedItem="{Binding SelectedPresentation}"
+                              VerticalContentAlignment="Center" SelectionChanged="cbOpenPowerpoints_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Button Grid.Column="1" Name="btnRefresh" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Segoe MDL2 Assets" Content="&#xE72C;" 
+                    FontSize="20" Background="White" Padding="10" Click="btnRefresh_Click"/>
+                </Grid>
+            </GroupBox>
+            
+
+        </StackPanel>
+
+        <GroupBox Header="Informationen" Padding="4" Grid.Row="1" Name="gbInfos" Visibility="Visible" DataContext="{Binding Presentation}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 10" Grid.Row="0">
+                    <TextBlock FontSize="20" Text="Geschätzte Gesamtdauer:" Margin="0 0 5 0"/>
+                    <TextBlock FontSize="20" 
+                           Text="{Binding TotalDuration, FallbackValue=xx:xx:xx, Converter={StaticResource MillisecondsToTimeConverter}}"
+                           Foreground="{Binding AnyValueNotFound, FallbackValue=Black, Converter={StaticResource ValueToColorConverter}}"                           
+                           />
+                </StackPanel>
+
+                <ListView ItemsSource="{Binding Slides}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                  ScrollViewer.CanContentScroll="False" Padding="20 10" Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <!--<local:SlideUserControl Height="120" Width="100" Margin="0 5">-->
+                                <local:SlideUserControl Height="130" Margin="0 5"/>
+
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left"
+                                           FontFamily="Segoe MDL2 Assets" Text="&#xE76C;" Margin="4"
+                                           Foreground="Black"
+                                           Visibility="{Binding IsLastSlide, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <!--<VirtualizingStackPanel Orientation="Horizontal"></VirtualizingStackPanel>-->
+                            <WrapPanel Width="{Binding RelativeSource={RelativeSource AncestorType=ItemContainerTemplate}, Path=ActualWidth}"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.Resources>
+                        <!--<ContextMenu x:Key="ItemContextMenu">
+                            <MenuItem Header="Code-Datei öffnen..." Click="ctxMenu_open" Background="WhiteSmoke" />
+                        </ContextMenu>-->
+                    </ListView.Resources>
+
+                    <!--<ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}" >
+                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
+                        </Style>
+                    </ListView.ItemContainerStyle>-->
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Margin" Value="0 2"/>
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </Grid>
+            
+        </GroupBox>
+
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0 8 0 0">
+            <TextBlock FontSize="12" Text="© Christian Ganhör" HorizontalAlignment="Right"/>
+            <!--<TextBlock FontSize="10" Text="App Icon from freepik.com" HorizontalAlignment="Right"/>-->
+            <!--<TextBlock FontSize="10" HorizontalAlignment="Right">
+                App Icon from
+                <Hyperlink NavigateUri="https://www.freepik.com" RequestNavigate="Hyperlink_RequestNavigate">
+                    freepik.com
+                </Hyperlink>
+            </TextBlock>-->
+        </StackPanel>
+    </Grid>
+</Window>
