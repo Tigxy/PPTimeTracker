@@ -5,17 +5,16 @@ using System.Windows.Media;
 
 
 namespace PPTime {
-    public class ValueToColorConverter : IValueConverter {
+    public class BoolToColorConverter : IValueConverter {
+        public SolidColorBrush FalseColor { get; set; } = Brushes.Black;
+        public SolidColorBrush TrueColor { get; set; } = Brushes.Red;
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            // Ensure the value is an integer
-            if (value is int intValue) {
-                // If the value is smaller 0, return Red
-                if (intValue < 0) {
-                    return Brushes.Red;
+            if (value is bool boolValue) {
+                if (boolValue) {
+                    return TrueColor;
                 }
             }
-
-            // Return default color (Black) if value is not -1
             return Brushes.Black;
         }
 
