@@ -40,10 +40,10 @@ namespace PPTime {
             InitializeComponent();
             Presentation = new CLIPresentation();
             this.DataContext = this;
-            RefreshPresentations();
+            RefreshPresentations(false);
         }
 
-        private void RefreshPresentations() {
+        private void RefreshPresentations(bool showUserMessages = true) {
             OpenPresentation? previouslySelectedPresentation = SelectedPresentation;
             SelectedPresentation = default;
 
@@ -78,9 +78,11 @@ namespace PPTime {
                 }
             }
             else {
-                Debug.WriteLine("PowerPoint is not running or there is no open presentation.");
-                MessageBox.Show("Es wurden keine geöffneten PowerPoint-Dateien gefunden.");
                 SelectedPresentation = default;
+                if (showUserMessages) {
+                    Debug.WriteLine("PowerPoint is not running or there is no open presentation.");
+                    MessageBox.Show("Es wurden keine geöffneten PowerPoint-Dateien gefunden.");
+                }
             }
         }
 
