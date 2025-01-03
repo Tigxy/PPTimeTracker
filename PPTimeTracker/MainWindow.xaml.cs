@@ -40,12 +40,16 @@ namespace PPTime {
             InitializeComponent();
             Presentation = new CLIPresentation();
             this.DataContext = this;
-            RefreshPresentations();
+            RefreshPresentations(false);
         }
 
-        private void RefreshPresentations() {
+        private void RefreshPresentations(bool showUserMessages = true) {
+            OpenPresentation? previouslySelectedPresentation = SelectedPresentation;
+            SelectedPresentation = default;
+
             List<OpenPresentation> openPresentations = PPUtils.GetOpenPresentations();
             if (openPresentations.Count > 0) {
+                // iterate from back to front to not cause indexing errors
                 for (int i = OpenPresentations.Count - 1; i >= 0; i--) {
                     var presentation = OpenPresentations[i];
                     if (!openPresentations.Contains(presentation)) {
@@ -61,21 +65,33 @@ namespace PPTime {
                         OpenPresentations.Add(presentation);
                     }
                 }
-                if (SelectedPresentation != default && !OpenPresentations.Contains(SelectedPresentation))
-                    SelectedPresentation = default;
-                if (SelectedPresentation == default && OpenPresentations.Count > 0)
+                if (previouslySelectedPresentation != default) {
+                    if (OpenPresentations.Contains(previouslySelectedPresentation)) {
+                        SelectedPresentation = previouslySelectedPresentation;
+                    }
+                    else {
+                        SelectedPresentation = default;
+                    }
+                }
+                if (previouslySelectedPresentation == default && OpenPresentations.Count > 0) {
                     SelectedPresentation = OpenPresentations.FirstOrDefault();
+                }
             }
             else {
-                Debug.WriteLine("PowerPoint is not running or there is no open presentation.");
-                MessageBox.Show("Es wurden keine geöffneten PowerPoint-Dateien gefunden.");
+                SelectedPresentation = default;
+                if (showUserMessages) {
+                    Debug.WriteLine("PowerPoint is not running or there is no open presentation.");
+                    MessageBox.Show(
+                        "Es wurde keine aktive PowerPoint-Instanz mit einer bearbeitbaren Datei gefunden. " +
+                        "Bitte stelle sicher, dass eine PowerPoint-Anwendung mit einer geöffneten Datei im Bearbeitungsmodus läuft."
+                    );
+                }
             }
         }
 
         private async void ReloadPresentation() {
             if (SelectedPresentation != default) {
                 Presentation.PresentationPath = SelectedPresentation?.Path;
-
                 _cts.Cancel();
                 try {
                     if (_previousTask != default) {
@@ -95,11 +111,13 @@ namespace PPTime {
 
                 _previousTask = Task.Run(() => Presentation.Reload(_cts.Token), _cts.Token);
             }
+            else {
+                Presentation.Reset();
+            }
         }
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e) {
             RefreshPresentations();
-            ReloadPresentation();
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e) {
@@ -107,10 +125,6 @@ namespace PPTime {
                 FileName = e.Uri.ToString(),
                 UseShellExecute = true
             });
-        }
-
-        private void cbOpenPowerpoints_Selected(object sender, RoutedEventArgs e) {
-            ReloadPresentation();
         }
 
         private void cbOpenPowerpoints_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {

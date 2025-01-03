@@ -73,6 +73,7 @@ namespace PPTimeTracker {
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        public abstract void Reset();
         public abstract void Reload(CancellationToken token);
     }
 }
